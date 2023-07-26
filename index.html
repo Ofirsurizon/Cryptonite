@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="stylesheet" href="assets/css/bootstrap.css" />
+
+    <script defer src="assets/jquery/jquery-3.7.0.js"></script>
+    <script defer src="assets/bootstrap/bootstrap.js"></script>
+
+    <script defer src="main.js"></script>
+    <script type="module" defer src="pages/coins.js"></script>
+    <script defer src="pages/about.js"></script>
+    <script defer src="pages/LiveReports.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  </head>
+
+  <body>
+
+        <!-- Background container for the image -->
+        <div class="background-container"></div>
+        
+    <!-- header -->
+    <div>
+      <h1 class="text-center text-white">🪙 Cryptonite</h1>
+    </div>
+
+    <!-- navbar -->
+    <div class="container-fluid">
+      <nav class="navbar navbar-expand-sm navbar-light bg-transparent">
+        <div class="container-fluid">
+          <button
+            class="navbar-toggler d-lg-none"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+
+          <div
+            class="collapse navbar-collapse justify-content-center"
+            id="navbarNav"
+          >
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a
+                  class="nav-link active text-white fs-4"
+                  aria-current="page"
+                  id="homePage"
+                  href="#"
+                  >Home
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-white fs-4" id="liveRepotsPage" href="#"
+                  >Reports</a
+                >
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-white fs-4" id="aboutPage" href="#"
+                  >About</a
+                >
+              </li>
+            </ul>
+
+            <form class="d-flex ms-auto form-inline" id="searchForm">
+              <input
+                class="form-control me-2"
+                type="search"
+                placeholder="Search"
+                aria-label="Search"
+              />
+              <button class="btn btn-outline-light" type="submit">
+                Search
+              </button>
+            </form>
+          </div>
+        </div>
+      </nav>
+    </div>
+
+    <!-- loader -->
+    <div id="loader" class="loader"></div>
+
+    <!-- container -->
+    <div id="container" class="container"></div>
+
+    <!-- Coins modal -->
+    <div id="modalContainer" style="display: none">
+      <div class="modal-content">
+        <h2>Selected Coins</h2>
+        <ul id="selectedCoinList"></ul>
+      </div>
+    </div>
+
+    <!--Canvas Reports  -->
+    <canvas id="myChart"></canvas>
+  </body>
+</html>
