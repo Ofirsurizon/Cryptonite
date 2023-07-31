@@ -5,7 +5,6 @@ function loadAbout() {
     $("#container").html(
       
       `
-      
       <div class="about-section">
 
       <h2>About Me</h2>

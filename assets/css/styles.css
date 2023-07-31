@@ -399,3 +399,8 @@ input:checked + .slider:before {
   line-height: 1.6em;
   text-align: justify;
 }
+
+#liveReportsChart {
+  background: black;
+  height: 300px !important; /* Increase the height to make it even bigger */
+}
