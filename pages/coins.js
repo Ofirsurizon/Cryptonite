@@ -56,7 +56,7 @@ async function fetchCoins() {
 
 function searchInCoins(item) {
   let data = getSessionStorage(COINS_DATA);
-  $("#container").empty();
+  cleanContainer();
   if (item === "") {
     renderCoins(data);
   } else {
@@ -67,12 +67,12 @@ function searchInCoins(item) {
   }
 }
 
-$("form").on("submit", function (event) {
+$("#search-form").on("submit", function (event) {
   event.preventDefault();
 });
 
 function renderCoins(coins) {
-  $("#container").empty();
+  cleanContainer();
   for (const coin of coins) {
     renderCoinElement(coin);
     addCoinEventHandlers(coin);
@@ -138,12 +138,16 @@ function onCoinToggle(coin) {
 
 function onCoinMoreInfoClick(coin) {
   return async () => {
-    $("#container").empty();
+    cleanContainer();
     displayLoader();
     const moreInfoData = await getMoreInfoData(coin);
     if (moreInfoData) renderMoreInfo(moreInfoData, coin);
     hideLoader();
   };
+}
+
+function cleanContainer() {
+  $("#container").empty();
 }
 
 //Session storage \\
@@ -250,7 +254,7 @@ function renderMoreInfo(moreInfoData, coin) {
         <img class="crypto-logo card-img-top w-25" src="${coin.image}" alt="Card image cap">
      </div>
       <div class="card-body">
-        <a class="custom-close"></a>
+        <a class="more-info-close-btn"></a>
         <h5 class="card-title">${coin.symbol}</h5>
         <p class="card-text">${coin.name}</p>
         <table class="table">
@@ -276,13 +280,11 @@ function renderMoreInfo(moreInfoData, coin) {
       </div>
           <div class="coin-details" style="display: none;"></div>
     </div>
-      `
+      `.trim()
   );
+
+  $(".more-info-close-btn").on("click", async function () {
+    cleanContainer();
+    await mount();
+  });
 }
-
-// close btn
-
-$("body").on("click", ".custom-close", async function () {
-  $("#container").empty();
-  await mount();
-});
