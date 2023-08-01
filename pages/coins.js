@@ -7,7 +7,6 @@ const MAX_AMOUNT_SELECTED_COINS = 5;
 
 let selectedCoins = getSessionStorage(SELECTED_COINS) ?? [];
 let coinsData;
-let currentItem;
 
 $(document).ready(mount);
 
@@ -132,9 +131,8 @@ function onCoinToggle(coin) {
 
     if (selectedCoins.length >= MAX_AMOUNT_SELECTED_COINS) {
       this.checked = false;
-      currentItem = coin;
       renderCoinReplacementModal();
-      addCoinReplacementModalEventHandlers();
+      addCoinReplacementModalEventHandlers(coin);
       return;
     }
 
@@ -220,8 +218,8 @@ function renderCoinReplacementModal() {
   $("#modal-container").show();
 }
 
-function addCoinReplacementModalEventHandlers() {
-  addDeselectEventHandler();
+function addCoinReplacementModalEventHandlers(coin) {
+  addDeselectEventHandler(coin);
 
   $("#selected-coins-list .modal-close-div").on("click", function () {
     $("#modal-container").hide();
@@ -229,25 +227,23 @@ function addCoinReplacementModalEventHandlers() {
 }
 
 // coins selecting
-function addDeselectEventHandler() {
+function addDeselectEventHandler(coin) {
   $("#selected-coins-list .deselect-coin").on("click", function () {
     const coinId = $(this).data("id");
 
-    $("#toggle-" + coinId)
+    $(`#toggle-${coinId}`)
       .prop("checked", false)
       .trigger("change");
 
-    selectedCoins = selectedCoins.filter((Id) => Id !== coinId);
+    removeCoinFromSelectedCoins({ id: coinId });
 
-    if (currentItem) {
-      selectedCoins.push(currentItem.id);
+    if (coin) {
+      selectedCoins.push(coin.id);
 
-      $("#toggle-" + currentItem.id).prop("checked", true);
-      currentItem = null;
+      $(`#toggle-${coinId}`).prop("checked", true).trigger("change");
     }
 
     $("#modal-container").hide();
-    $("#toggle-" + coinId).trigger("change");
   });
 }
 
