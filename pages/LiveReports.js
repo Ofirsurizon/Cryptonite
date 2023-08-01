@@ -1,6 +1,5 @@
 let selectedChart;
 let chartInterval;
-let selectedCoins = [];
 
 const colors = [
   "#FF0000", // Red

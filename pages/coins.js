@@ -2,8 +2,11 @@ const COINS_URL =
   "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1";
 
 const COINS_DATA = "coinsData";
+const SELECTED_COINS = "selectedCoins";
+const MAX_AMOUNT_SELECTED_COINS = 5;
 
-let selectedCoins = getSessionStorage("selectedCoins") ?? [];
+let selectedCoins = getSessionStorage(SELECTED_COINS) ?? [];
+let coinsData;
 let currentItem;
 
 $(document).ready(mount);
@@ -27,6 +30,7 @@ async function loadCoinsPage() {
   displayLoader();
   const data = await getCoinsData();
   if (Array.isArray(data)) renderCoins(data);
+  coinsData = data;
   hideLoader();
 }
 
@@ -120,20 +124,31 @@ function renderCoinElement(coin) {
 
 function onCoinToggle(coin) {
   return function () {
-    if (this.checked) {
-      if (selectedCoins.length >= 5) {
-        this.checked = false;
-        currentItem = coin;
-        showCoinReplacementModal();
-      } else {
-        selectedCoins.push(coin.id);
-      }
-      saveSessionStorage("selectedCoins", selectedCoins);
-    } else {
-      selectedCoins = selectedCoins.filter((coinId) => coinId !== coin.id);
-      saveSessionStorage("selectedCoins", selectedCoins);
+    if (!this.checked) {
+      removeCoinFromSelectedCoins(coin);
+      updateStorageSelectedCoins();
+      return;
     }
+
+    if (selectedCoins.length >= MAX_AMOUNT_SELECTED_COINS) {
+      this.checked = false;
+      currentItem = coin;
+      renderCoinReplacementModal();
+      addCoinReplacementModalEventHandlers();
+      return;
+    }
+
+    selectedCoins.push(coin.id);
+    updateStorageSelectedCoins();
   };
+}
+
+function updateStorageSelectedCoins() {
+  saveSessionStorage(SELECTED_COINS, selectedCoins);
+}
+
+function removeCoinFromSelectedCoins(coin) {
+  selectedCoins = selectedCoins.filter((coinId) => coinId !== coin.id);
 }
 
 function onCoinMoreInfoClick(coin) {
@@ -150,7 +165,7 @@ function cleanContainer() {
   $("#container").empty();
 }
 
-//Session storage \\
+// Session storage
 function getSessionStorage(key) {
   const coinsData = sessionStorage.getItem(key);
   return coinsData ? JSON.parse(coinsData) : null;
@@ -160,7 +175,7 @@ function saveSessionStorage(key, value) {
   sessionStorage.setItem(key, JSON.stringify(value));
 }
 
-// loader Funcs \\
+// loader Funcs
 function hideLoader() {
   document.getElementById("loader").style.display = "none";
 }
@@ -170,7 +185,6 @@ function displayLoader() {
 }
 
 // Error handling
-
 function handleError() {
   $("#container").html("Had a network error").css({
     color: "white",
@@ -181,55 +195,61 @@ function handleError() {
   });
 }
 
-function showCoinReplacementModal() {
-  $("#selectedCoinList").empty();
+function renderCoinReplacementModal() {
+  $("#selected-coins-list").empty();
 
   selectedCoins.forEach((coinId) => {
-    $("#selectedCoinList").append(
-      `<li class="deselect-coin-item"><button class="deselect-coin" data-id="${coinId}">Deselect ${coinId}</button></li>`
+    const coin = coinsData.find(c => c.id === coinId)
+    $("#selected-coins-list").append(
+      `<li class="deselect-coin-item">
+        <button class="deselect-coin" data-id="${coinId}">
+          Deselect ${coin.name}
+        </button>
+      </li>`
     );
   });
 
-  $("#selectedCoinList").append(
-    `<li class="modal-close-div"><button class="modal-close">Close</button></li>`
+  $("#selected-coins-list").append(
+    `<li class="modal-close-div">
+      <button class="modal-close">
+        Close
+      </button>
+    </li>`
   );
 
   $("#modal-container").show();
 }
 
-// coins selecting
+function addCoinReplacementModalEventHandlers() {
+  addDeselectEventHandler();
 
-$("#selectedCoinList").on("click", ".deselect-coin", function () {
-  const coinId = $(this).data("id");
-
-  $("#toggle-" + coinId)
-    .prop("checked", false)
-    .trigger("change");
-
-  selectedCoins = selectedCoins.filter((Id) => Id !== coinId);
-
-  if (currentItem) {
-    selectedCoins.push(currentItem.id);
-
-    $("#toggle-" + currentItem.id).prop("checked", true);
-    currentItem = null;
-  }
-
-  $(this).parent().remove();
-  $("#toggle-" + coinId).trigger("change");
-});
-
-// if has nothing hide
-$("#modal-container").on("click", function (item) {
-  if (!$(item.target).closest(".modal-content").length) {
+  $("#selected-coins-list .modal-close-div").on("click", function () {
     $("#modal-container").hide();
-  }
-});
+  });
+}
 
-//
-$("#selectedCoinList").on("click", ".modal-close-div", function () {
-  $("#modal-container").hide();
-});
+// coins selecting
+function addDeselectEventHandler() {
+  $("#selected-coins-list .deselect-coin").on("click", function () {
+    const coinId = $(this).data("id");
+
+    $("#toggle-" + coinId)
+      .prop("checked", false)
+      .trigger("change");
+
+    selectedCoins = selectedCoins.filter((Id) => Id !== coinId);
+
+    if (currentItem) {
+      selectedCoins.push(currentItem.id);
+
+      $("#toggle-" + currentItem.id).prop("checked", true);
+      currentItem = null;
+    }
+
+    $("#modal-container").hide();
+    $("#toggle-" + coinId).trigger("change");
+  });
+}
 
 async function getMoreInfoData(item) {
   try {
