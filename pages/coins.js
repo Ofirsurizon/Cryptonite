@@ -26,7 +26,7 @@ function onSearch() {
 async function loadCoinsPage() {
   displayLoader();
   const data = await getCoinsData();
-  renderCoins(data);
+  if (Array.isArray(data)) renderCoins(data);
   hideLoader();
 }
 
@@ -74,22 +74,28 @@ $("form").on("submit", function (event) {
   event.preventDefault();
 });
 
-function renderCoins(data) {
-  for (const item of data) {
-    $("#container").append(
-      `
+function renderCoins(coins) {
+  $("#container").empty()
+  for (const coin of coins) {
+    renderCoin(coin);
+  }
+}
+
+function renderCoin(coin) {
+  $("#container").append(
+    `
     <div class="mt-5 card border" style="width: 18rem;">  
       <div class="text-center">
-        <img class="crypto-logo card-img-top w-25" src="${item.image}" alt="Card image cap">
+        <img class="crypto-logo card-img-top w-25" src="${coin.image}" alt="Card image cap">
       </div>
         
       <div class="card-body d-flex flex-column align-items-center">
-        <h5 class="card-title text-center">${item.symbol}</h5>
-        <p class="card-text text-center ">${item.name}</p>
-        <a id="${item.id}" class="btn btn-primary more-info">More info</a>
+        <h5 class="card-title text-center">${coin.symbol}</h5>
+        <p class="card-text text-center ">${coin.name}</p>
+        <a id="${coin.id}" class="btn btn-primary more-info">More info</a>
               <div class="mt-2 toggle-button">
           <label class="switch">
-          <input type="checkbox" id="toggle-${item.id}">
+          <input type="checkbox" id="toggle-${coin.id}">
             <span class="slider round"></span>
           </label>
         </div>
@@ -101,35 +107,34 @@ function renderCoins(data) {
         <div class="coin-details" style="display: none;"></div>
         </div>
         `
-    );
-    $("#" + item.id).on("click", () => {
-      $("#container").empty();
-      displayLoader();
-      moreInfo(item);
-      hideLoader();
-    });
+  );
+  $("#" + coin.id).on("click", () => {
+    $("#container").empty();
+    displayLoader();
+    moreInfo(coin);
+    hideLoader();
+  });
 
-    $(() => {
-      if (selectedCoins.find((id) => id == item.id))
-        $("#toggle-" + item.id).prop("checked", true);
-    });
+  $(() => {
+    if (selectedCoins.find((id) => id == coin.id))
+      $("#toggle-" + coin.id).prop("checked", true);
+  });
 
-    $("#toggle-" + item.id).on("change", function () {
-      if (this.checked) {
-        if (selectedCoins.length >= 5) {
-          this.checked = false;
-          currentItem = item;
-          showCoinReplacementModal();
-        } else {
-          selectedCoins.push(item.id);
-        }
-        saveSessionStorage("selectedCoins", selectedCoins);
+  $("#toggle-" + coin.id).on("change", function () {
+    if (this.checked) {
+      if (selectedCoins.length >= 5) {
+        this.checked = false;
+        currentItem = coin;
+        showCoinReplacementModal();
       } else {
-        selectedCoins = selectedCoins.filter((coinId) => coinId !== item.id);
-        saveSessionStorage("selectedCoins", selectedCoins);
+        selectedCoins.push(coin.id);
       }
-    });
-  }
+      saveSessionStorage("selectedCoins", selectedCoins);
+    } else {
+      selectedCoins = selectedCoins.filter((coinId) => coinId !== coin.id);
+      saveSessionStorage("selectedCoins", selectedCoins);
+    }
+  });
 }
 
 //Session storage \\
