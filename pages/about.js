@@ -1,6 +1,6 @@
 
 function loadAbout() {
-    $('#searchForm').attr("style", "display: none !important;");
+    $('#search-form').attr("style", "display: none !important;");
     $("#container").empty();
     $("#container").html(
       
@@ -44,7 +44,7 @@ $(document).ready(function() {
 $(document).ready(function() {
     $("#homePage").click(function(event) {
         event.preventDefault();
-        $("#searchForm").show();
+        $("#search-form").show();
         $("#container").empty(); 
         window.mount(); 
     });

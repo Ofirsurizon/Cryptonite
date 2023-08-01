@@ -1,6 +1,5 @@
 let selectedChart;
 let chartInterval;
-let selectedCoins = [];
 
 const colors = [
   "#FF0000", // Red
@@ -19,7 +18,7 @@ function clearChartData() {
 }
 
 function loadReports() {
-    $("#searchForm").attr("style", "display: none !important;");
+    $("#search-form").attr("style", "display: none !important;");
     $("#container").empty();
     $("#container").html('<canvas id="liveReportsChart" style="width:100%;max-width:800px"></canvas>');
     selectedCoins = sessionStorage.getItem("selectedCoins");
@@ -44,7 +43,7 @@ function loadReports() {
     $("#homePage").click(function (event) {
       event.preventDefault();
       clearInterval(chartInterval);
-      $("#searchForm").show();
+      $("#search-form").show();
       $("#container").empty();
       window.mount();
     });

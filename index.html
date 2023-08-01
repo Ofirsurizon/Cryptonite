@@ -8,21 +8,28 @@
     <link rel="stylesheet" href="assets/css/styles.css" />
     <link rel="stylesheet" href="assets/css/bootstrap.css" />
 
+    <!-- resources scripts -->
     <script defer src="assets/jquery/jquery-3.7.0.js"></script>
     <script defer src="assets/bootstrap/bootstrap.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
-    <script defer src="main.js"></script>
-    <script type="module" defer src="pages/coins.js"></script>
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"
+    ></script>
+    <script
+      defer
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    ></script>
+
+    <!-- load pages scripts -->
+    <script defer src="pages/coins.js"></script>
     <script defer src="pages/about.js"></script>
     <script defer src="pages/LiveReports.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
   </head>
 
   <body>
+    <!-- Background container for the image -->
+    <div class="background-container"></div>
 
-        <!-- Background container for the image -->
-        <div class="background-container"></div>
-        
     <!-- header -->
     <div>
       <h1 class="text-center text-white">🪙 Cryptonite</h1>
@@ -70,9 +77,9 @@
               </li>
             </ul>
 
-            <form class="d-flex ms-auto form-inline" id="searchForm">
+            <form class="d-flex ms-auto form-inline" id="search-form">
               <input
-                class="form-control me-2"
+                class="form-control me-2 search-coins-input"
                 type="search"
                 placeholder="Search"
                 aria-label="Search"
@@ -93,14 +100,11 @@
     <div id="container" class="container"></div>
 
     <!-- Coins modal -->
-    <div id="modalContainer" style="display: none">
+    <div id="modal-container" style="display: none">
       <div class="modal-content">
         <h2>Selected Coins</h2>
-        <ul id="selectedCoinList"></ul>
+        <ul id="selected-coins-list"></ul>
       </div>
     </div>
-
-    <!--Canvas Reports  -->
-    <canvas id="myChart"></canvas>
   </body>
 </html>

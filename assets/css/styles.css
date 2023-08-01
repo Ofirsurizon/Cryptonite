@@ -180,7 +180,7 @@ input:checked + .slider:before {
 }
 
 /* Custom close button */
-.custom-close {
+.more-info-close-btn {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -192,8 +192,8 @@ input:checked + .slider:before {
   transition: all 0.3s ease 0s;
 }
 
-.custom-close:before,
-.custom-close:after {
+.more-info-close-btn:before,
+.more-info-close-btn:after {
   content: "";
   position: absolute;
   top: 50%;
@@ -203,15 +203,15 @@ input:checked + .slider:before {
   background-color: #ffffff;
 }
 
-.custom-close:before {
+.more-info-close-btn:before {
   transform: translate(-50%, -50%) rotate(45deg);
 }
 
-.custom-close:after {
+.more-info-close-btn:after {
   transform: translate(-50%, -50%) rotate(-45deg);
 }
 
-.custom-close:hover {
+.more-info-close-btn:hover {
   background-color: #686868;
   box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.416);
   transform: translateY(-7px);
@@ -265,7 +265,7 @@ input:checked + .slider:before {
   justify-content: center !important;
 }
 
-#searchForm {
+#search-form {
   padding-right: 50px; /* Increase the right padding to prevent overlapping */
 }
 
@@ -290,7 +290,7 @@ input:checked + .slider:before {
 }
 
 /* Modal Container */
-#modalContainer {
+#modal-container {
   display: none;
   position: fixed;
   z-index: 2000;
@@ -403,4 +403,9 @@ input:checked + .slider:before {
 #liveReportsChart {
   background: black;
   height: 300px !important; /* Increase the height to make it even bigger */
+}
+
+.deselect-coin {
+  width: 100%;
+  height: 100%;
 }
