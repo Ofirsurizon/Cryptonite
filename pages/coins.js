@@ -2,14 +2,15 @@ const COINS_URL =
   "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1";
 
 const COINS_DATA = "coinsData";
-// as the page is load i ask him if he has something in the session storage if he has it take the session storage if not reload it as a arr \\
+
 let selectedCoins = getSessionStorage("selectedCoins") ?? [];
 let currentItem;
+
 $(document).ready(mount);
 
 // mount the page
 async function mount() {
-  $("#modalContainer").hide();
+  $("#modal-container").hide();
   await loadCoinsPage();
   $(".search-coins-input").off("input", onSearch).on("input", onSearch);
 }
@@ -34,7 +35,7 @@ async function getCoinsData() {
   if (storageData) return storageData;
 
   const coinsData = await getCoinData();
-  saveSessionStorage(COINS_DATA, coinsData);
+  if (coinsData) saveSessionStorage(COINS_DATA, coinsData);
   return coinsData;
 }
 
@@ -45,6 +46,8 @@ async function getCoinData() {
     return data;
   } catch (err) {
     handleCoinError();
+  } finally {
+    hideLoader();
   }
 }
 
@@ -151,7 +154,7 @@ function displayLoader() {
 // Error handling
 
 function handleCoinError() {
-  $("#container").html(`Had a network error`).css({
+  $("#container").html("Had a network error").css({
     color: "white",
     margin: "0px auto",
     "text-align": "center",
@@ -173,7 +176,7 @@ function showCoinReplacementModal() {
     `<li class="modal-close-div"><button class="modal-close">Close</button></li>`
   );
 
-  $("#modalContainer").show();
+  $("#modal-container").show();
 }
 
 // coins selecting
@@ -199,15 +202,15 @@ $("#selectedCoinList").on("click", ".deselect-coin", function () {
 });
 
 // if has nothing hide
-$("#modalContainer").on("click", function (item) {
+$("#modal-container").on("click", function (item) {
   if (!$(item.target).closest(".modal-content").length) {
-    $("#modalContainer").hide();
+    $("#modal-container").hide();
   }
 });
 
 //
 $("#selectedCoinList").on("click", ".modal-close-div", function () {
-  $("#modalContainer").hide();
+  $("#modal-container").hide();
 });
 
 async function moreInfo(item) {

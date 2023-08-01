@@ -265,7 +265,7 @@ input:checked + .slider:before {
   justify-content: center !important;
 }
 
-#searchForm {
+#search-form {
   padding-right: 50px; /* Increase the right padding to prevent overlapping */
 }
 
@@ -290,7 +290,7 @@ input:checked + .slider:before {
 }
 
 /* Modal Container */
-#modalContainer {
+#modal-container {
   display: none;
   position: fixed;
   z-index: 2000;
