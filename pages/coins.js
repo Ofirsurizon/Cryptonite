@@ -1,32 +1,42 @@
 const COINS_URL =
   "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1";
 
+const COINS_DATA = "coinsData";
 // as the page is load i ask him if he has something in the session storage if he has it take the session storage if not reload it as a arr \\
-let selectedCoins = getSessionStorage("selectedCoins") ? getSessionStorage("selectedCoins") : [];
+let selectedCoins = getSessionStorage("selectedCoins") ?? [];
 let currentItem;
 $(document).ready(mount);
-$("#modalContainer").hide();
 
 // mount the page
 async function mount() {
-  displayLoader();
-  let data = getSessionStorage("coinsData");
-  if (!data) {
-    data = await getCoinData();
-    saveSessionStorage("coinsData", data);
-  }
-  renderCoins(data);
-  hideLoader();
-
-  $("input[type='search']").on("input", function () {
-    displayLoader();
-    let searchTerm = $(this).val();
-    searchInCoins(searchTerm);
-    hideLoader();
-  });
+  $("#modalContainer").hide();
+  await loadCoinsPage();
+  $(".search-coins-input").off("input", onSearch).on("input", onSearch);
 }
 window.mount = mount;
 
+function onSearch() {
+  displayLoader();
+  const searchTerm = $(this).val();
+  searchInCoins(searchTerm);
+  hideLoader();
+}
+
+async function loadCoinsPage() {
+  displayLoader();
+  const data = await getCoinsData();
+  renderCoins(data);
+  hideLoader();
+}
+
+async function getCoinsData() {
+  const storageData = getSessionStorage(COINS_DATA);
+  if (storageData) return storageData;
+
+  const coinsData = await getCoinData();
+  saveSessionStorage(COINS_DATA, coinsData);
+  return coinsData;
+}
 
 async function getCoinData() {
   try {
@@ -35,7 +45,7 @@ async function getCoinData() {
     return data;
   } catch (err) {
     handleCoinError();
-  } 
+  }
 }
 
 async function fetchCoins() {
@@ -45,7 +55,7 @@ async function fetchCoins() {
 }
 
 function searchInCoins(item) {
-  let data = getSessionStorage("coinsData");
+  let data = getSessionStorage(COINS_DATA);
   $("#container").empty();
   if (item === "") {
     renderCoins(data);
@@ -106,7 +116,7 @@ function renderCoins(data) {
         if (selectedCoins.length >= 5) {
           this.checked = false;
           currentItem = item;
-          showModal();
+          showCoinReplacementModal();
         } else {
           selectedCoins.push(item.id);
         }
@@ -129,7 +139,6 @@ function saveSessionStorage(key, value) {
   sessionStorage.setItem(key, JSON.stringify(value));
 }
 
-
 // loader Funcs \\
 function hideLoader() {
   document.getElementById("loader").style.display = "none";
@@ -138,8 +147,6 @@ function hideLoader() {
 function displayLoader() {
   document.getElementById("loader").style.display = "block";
 }
-
-
 
 // Error handling
 
@@ -153,9 +160,7 @@ function handleCoinError() {
   });
 }
 
-
-// Show the modal
-function showModal() {
+function showCoinReplacementModal() {
   $("#selectedCoinList").empty();
 
   selectedCoins.forEach((coinId) => {
@@ -200,11 +205,10 @@ $("#modalContainer").on("click", function (item) {
   }
 });
 
-// 
+//
 $("#selectedCoinList").on("click", ".modal-close-div", function () {
   $("#modalContainer").hide();
 });
-
 
 async function moreInfo(item) {
   const response = await fetch(
