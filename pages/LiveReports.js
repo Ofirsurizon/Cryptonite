@@ -21,8 +21,9 @@ function loadReports() {
     $("#search-form").attr("style", "display: none !important;");
     $("#container").empty();
     $("#container").html('<canvas id="liveReportsChart" style="width:100%;max-width:800px"></canvas>');
-    selectedCoins = sessionStorage.getItem("selectedCoins");
-    selectedCoins = JSON.parse(selectedCoins);
+
+    selectedCoins = getSessionStorage(SELECTED_COINS) ?? [];
+
     clearChartData();
   
     if (selectedCoins && selectedCoins.length > 0) {
