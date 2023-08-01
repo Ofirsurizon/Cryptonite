@@ -41,13 +41,10 @@ async function getCoinsData() {
 
 async function getCoinData() {
   try {
-    displayLoader();
     const data = await fetchCoins();
     return data;
   } catch (err) {
-    handleCoinError();
-  } finally {
-    hideLoader();
+    handleError();
   }
 }
 
@@ -75,52 +72,54 @@ $("form").on("submit", function (event) {
 });
 
 function renderCoins(coins) {
-  $("#container").empty()
+  $("#container").empty();
   for (const coin of coins) {
-    renderCoin(coin);
+    renderCoinElement(coin);
+    addCoinEventHandlers(coin);
   }
 }
 
-function renderCoin(coin) {
+function addCoinEventHandlers(coin) {
+  $(`#more-info-coin-${coin.id}`).on("click", onCoinMoreInfoClick(coin));
+
+  const isSelectedCoin = selectedCoins.some((id) => id == coin.id);
+  if (isSelectedCoin) {
+    $("#toggle-" + coin.id).prop("checked", true);
+  }
+
+  $("#toggle-" + coin.id).on("change", onCoinToggle(coin));
+}
+
+function renderCoinElement(coin) {
   $("#container").append(
     `
-    <div class="mt-5 card border" style="width: 18rem;">  
+    <div class="coin-container mt-5 card border" style="width: 18rem;">  
       <div class="text-center">
-        <img class="crypto-logo card-img-top w-25" src="${coin.image}" alt="Card image cap">
+        <img class="crypto-logo card-img-top w-25" src="${coin.image}" alt="Card image cap" />
       </div>
         
       <div class="card-body d-flex flex-column align-items-center">
         <h5 class="card-title text-center">${coin.symbol}</h5>
         <p class="card-text text-center ">${coin.name}</p>
-        <a id="${coin.id}" class="btn btn-primary more-info">More info</a>
-              <div class="mt-2 toggle-button">
+        <a id="more-info-coin-${coin.id}" class="btn btn-primary more-info">
+          More info
+        </a>
+        <div class="mt-2 toggle-button">
           <label class="switch">
-          <input type="checkbox" id="toggle-${coin.id}">
+            <input type="checkbox" id="toggle-${coin.id}" />
             <span class="slider round"></span>
           </label>
         </div>
       </div>
+
       <div class="coin-details" style="display: none;"></div>
-  </div>
-            </div>
-        
-        <div class="coin-details" style="display: none;"></div>
-        </div>
-        `
+    </div>
+    `.trim()
   );
-  $("#" + coin.id).on("click", () => {
-    $("#container").empty();
-    displayLoader();
-    moreInfo(coin);
-    hideLoader();
-  });
+}
 
-  $(() => {
-    if (selectedCoins.find((id) => id == coin.id))
-      $("#toggle-" + coin.id).prop("checked", true);
-  });
-
-  $("#toggle-" + coin.id).on("change", function () {
+function onCoinToggle(coin) {
+  return function () {
     if (this.checked) {
       if (selectedCoins.length >= 5) {
         this.checked = false;
@@ -134,7 +133,17 @@ function renderCoin(coin) {
       selectedCoins = selectedCoins.filter((coinId) => coinId !== coin.id);
       saveSessionStorage("selectedCoins", selectedCoins);
     }
-  });
+  };
+}
+
+function onCoinMoreInfoClick(coin) {
+  return async () => {
+    $("#container").empty();
+    displayLoader();
+    const moreInfoData = await getMoreInfoData(coin);
+    if (moreInfoData) renderMoreInfo(moreInfoData, coin);
+    hideLoader();
+  };
 }
 
 //Session storage \\
@@ -158,7 +167,7 @@ function displayLoader() {
 
 // Error handling
 
-function handleCoinError() {
+function handleError() {
   $("#container").html("Had a network error").css({
     color: "white",
     margin: "0px auto",
@@ -218,39 +227,49 @@ $("#selectedCoinList").on("click", ".modal-close-div", function () {
   $("#modal-container").hide();
 });
 
-async function moreInfo(item) {
-  const response = await fetch(
-    `https://api.coingecko.com/api/v3/coins/${item.id}`
-  );
-  const coinData = await response.json();
+async function getMoreInfoData(item) {
+  try {
+    const moreInfoData = await fetchMoreInfoData(item);
+    return moreInfoData;
+  } catch (err) {
+    handleError();
+  }
+}
 
+async function fetchMoreInfoData(item) {
+  const res = await fetch(`https://api.coingecko.com/api/v3/coins/${item.id}`);
+  const moreInfoData = await res.json();
+  return moreInfoData;
+}
+
+function renderMoreInfo(moreInfoData, coin) {
   $("#container").html(
     `
     <div class="mt-5 card border">
       <div class="text-center">
-        <img class="crypto-logo card-img-top w-25" src="${item.image}" alt="Card image cap">
+        <img class="crypto-logo card-img-top w-25" src="${coin.image}" alt="Card image cap">
      </div>
       <div class="card-body">
         <a class="custom-close"></a>
-        <h5 class="card-title">${item.symbol}</h5>
-        <p class="card-text">${item.name}</p>
+        <h5 class="card-title">${coin.symbol}</h5>
+        <p class="card-text">${coin.name}</p>
         <table class="table">
           <tbody>
              <tr>
               <th>Price in ILS:</th>
-              <td>${coinData.market_data.current_price.ils}₪</td>
+              <td>${moreInfoData.market_data.current_price.ils}₪</td>
             </tr>
              <tr>
               <th>Price in USD:</th>
-              <td>${coinData.market_data.current_price.usd}$</td>
+              <td>${moreInfoData.market_data.current_price.usd}$</td>
             </tr>
             <tr>
                <th>Price in EUR:</th>
-                <td>${coinData.market_data.current_price.eur}€</td>
+                <td>${moreInfoData.market_data.current_price.eur}€</td>
             </tr>
             <tr>
               <th>Last Updated:</th>
-                <td>${item.last_updated}</td>
+                <td>${coin.last_updated}</td>
             </tr>
           </tbody>
         </table>
