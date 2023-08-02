@@ -244,21 +244,26 @@ function addCoinReplacementModalEventHandlers(newCoin) {
   });
 }
 
-// coins selecting
+// coins deselecting
 function addDeselectEventHandler(newCoin) {
   $("#selected-coins-list .deselect-coin").on("click", function () {
     const coinIdToDeselect = $(this).data("id");
-
-    $(`#toggle-${coinIdToDeselect}`).prop("checked", false).trigger("change");
-
+    
+    removeCoinFromSelectedCoins({ id: coinIdToDeselect });
+    
     if (newCoin) {
       selectedCoins.push(newCoin.id);
       $(`#toggle-${newCoin.id}`).prop("checked", true);
     }
 
+    updateStorageSelectedCoins();
+
+    $(`#toggle-${coinIdToDeselect}`).prop("checked", false);
+
     $("#modal-container").hide();
   });
 }
+
 
 // MORE INFO DATA AND FETCH
 async function getMoreInfoData(item) {
