@@ -138,7 +138,6 @@ input:checked + .slider:before {
   box-shadow: 10px 10px 10px rgb(169, 169, 169);
 }
 
-/* Container */
 #container {
   display: flex;
   flex-wrap: wrap;
@@ -146,7 +145,21 @@ input:checked + .slider:before {
   overflow-x: auto;
   width: 90%;
   margin: auto;
-  gap: 19px;
+  gap: 19px; /* You may need to adjust this depending on your layout */
+}
+
+.coin-container {
+  flex: 0 1 calc(20% - 20px); /* 20% for five items */
+  max-width: calc(20% - 20px);
+  
+}
+
+
+@media (max-width: 768px) { 
+  .coin-container {
+    flex: 0 1 calc(33.33% - 20px); 
+    max-width: calc(33.33% - 20px);
+  }
 }
 
 /* Card */
