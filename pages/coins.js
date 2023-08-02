@@ -10,14 +10,16 @@ let coinsData;
 
 $(document).ready(mount);
 
+window.mount = mount;
+
 // mount the page
 async function mount() {
   $("#modal-container").hide();
   await loadCoinsPage();
   $(".search-coins-input").off("input", onSearch).on("input", onSearch);
 }
-window.mount = mount;
 
+// ON SEARCH
 function onSearch() {
   displayLoader();
   const searchTerm = $(this).val();
@@ -25,6 +27,7 @@ function onSearch() {
   hideLoader();
 }
 
+// LOAD THE COINS PAGE
 async function loadCoinsPage() {
   displayLoader();
   const data = await getCoinsData();
@@ -32,6 +35,8 @@ async function loadCoinsPage() {
   coinsData = data;
   hideLoader();
 }
+
+// GET COINS DATA AND HANDLING IT
 
 async function getCoinsData() {
   const storageData = getSessionStorage(COINS_DATA);
@@ -57,6 +62,8 @@ async function fetchCoins() {
   return data;
 }
 
+// SEARCH INPUT
+
 function searchInCoins(item) {
   let data = getSessionStorage(COINS_DATA);
   cleanContainer();
@@ -73,6 +80,8 @@ function searchInCoins(item) {
 $("#search-form").on("submit", function (event) {
   event.preventDefault();
 });
+
+//  RENDER COINS EVENT HANDLERS AND RENDER EACH COIN
 
 function renderCoins(coins) {
   cleanContainer();
@@ -121,6 +130,8 @@ function renderCoinElement(coin) {
   );
 }
 
+//  COINS TOGGLE HANDLING
+
 function onCoinToggle(coin) {
   return function () {
     if (!this.checked) {
@@ -131,8 +142,7 @@ function onCoinToggle(coin) {
 
     if (selectedCoins.length >= MAX_AMOUNT_SELECTED_COINS) {
       this.checked = false;
-      renderCoinReplacementModal();
-      addCoinReplacementModalEventHandlers(coin);
+      renderCoinReplacementModal(coin);
       return;
     }
 
@@ -144,10 +154,13 @@ function onCoinToggle(coin) {
 function updateStorageSelectedCoins() {
   saveSessionStorage(SELECTED_COINS, selectedCoins);
 }
+// COIN REMOVAL
 
 function removeCoinFromSelectedCoins(coin) {
   selectedCoins = selectedCoins.filter((coinId) => coinId !== coin.id);
 }
+
+// MORE INFO BUTTON
 
 function onCoinMoreInfoClick(coin) {
   return async () => {
@@ -158,6 +171,8 @@ function onCoinMoreInfoClick(coin) {
     hideLoader();
   };
 }
+
+// CLEAN CONTAINER FUNCTION
 
 function cleanContainer() {
   $("#container").empty();
@@ -193,11 +208,13 @@ function handleError() {
   });
 }
 
-function renderCoinReplacementModal() {
+// RENDER COINS REPLACEMENT
+
+function renderCoinReplacementModal(newCoin) {
   $("#selected-coins-list").empty();
 
   selectedCoins.forEach((coinId) => {
-    const coin = coinsData.find(c => c.id === coinId)
+    const coin = coinsData.find((c) => c.id === coinId);
     $("#selected-coins-list").append(
       `<li class="deselect-coin-item">
         <button class="deselect-coin" data-id="${coinId}">
@@ -216,10 +233,11 @@ function renderCoinReplacementModal() {
   );
 
   $("#modal-container").show();
+  addCoinReplacementModalEventHandlers(newCoin);
 }
 
-function addCoinReplacementModalEventHandlers(coin) {
-  addDeselectEventHandler(coin);
+function addCoinReplacementModalEventHandlers(newCoin) {
+  addDeselectEventHandler(newCoin);
 
   $("#selected-coins-list .modal-close-div").on("click", function () {
     $("#modal-container").hide();
@@ -227,26 +245,22 @@ function addCoinReplacementModalEventHandlers(coin) {
 }
 
 // coins selecting
-function addDeselectEventHandler(coin) {
+function addDeselectEventHandler(newCoin) {
   $("#selected-coins-list .deselect-coin").on("click", function () {
-    const coinId = $(this).data("id");
+    const coinIdToDeselect = $(this).data("id");
 
-    $(`#toggle-${coinId}`)
-      .prop("checked", false)
-      .trigger("change");
+    $(`#toggle-${coinIdToDeselect}`).prop("checked", false).trigger("change");
 
-    removeCoinFromSelectedCoins({ id: coinId });
-
-    if (coin) {
-      selectedCoins.push(coin.id);
-
-      $(`#toggle-${coinId}`).prop("checked", true).trigger("change");
+    if (newCoin) {
+      selectedCoins.push(newCoin.id);
+      $(`#toggle-${newCoin.id}`).prop("checked", true);
     }
 
     $("#modal-container").hide();
   });
 }
 
+// MORE INFO DATA AND FETCH
 async function getMoreInfoData(item) {
   try {
     const moreInfoData = await fetchMoreInfoData(item);
@@ -261,6 +275,8 @@ async function fetchMoreInfoData(item) {
   const moreInfoData = await res.json();
   return moreInfoData;
 }
+
+//  RENDER MORE INFO
 
 function renderMoreInfo(moreInfoData, coin) {
   $("#container").html(
@@ -298,7 +314,7 @@ function renderMoreInfo(moreInfoData, coin) {
     </div>
       `.trim()
   );
-
+  // CLOSE BTN
   $(".more-info-close-btn").on("click", async function () {
     cleanContainer();
     await mount();
