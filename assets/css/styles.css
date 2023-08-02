@@ -157,8 +157,9 @@ input:checked + .slider:before {
 
 @media (max-width: 768px) { 
   .coin-container {
-    flex: 0 1 calc(33.33% - 20px); 
-    max-width: calc(33.33% - 20px);
+    flex: 0 1 calc(30% - 20px); /* Adjusted to 50% for two items in a row */
+    max-width: calc(50% - 20px);
+  
   }
 }
 
