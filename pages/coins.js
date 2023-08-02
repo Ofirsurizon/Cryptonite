@@ -71,7 +71,7 @@ function searchInCoins(item) {
     renderCoins(data);
   } else {
     let filteredData = data.filter((coin) =>
-      coin.name.toLowerCase().includes(item.toLowerCase())
+      coin.name.toLowerCase().includes(item.toLowerCase()) || coin.symbol.toLowerCase().includes(item.toLowerCase())
     );
     renderCoins(filteredData);
   }
