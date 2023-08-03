@@ -30,6 +30,7 @@ body {
   }
 }
 
+
 .navbar-toggler {
   display: block !important;
 }
@@ -145,7 +146,7 @@ input:checked + .slider:before {
   overflow-x: auto;
   width: 90%;
   margin: auto;
-  gap: 19px; /* You may need to adjust this depending on your layout */
+  gap: 19px; 
 }
 
 .coin-container {
@@ -158,10 +159,19 @@ input:checked + .slider:before {
 @media (max-width: 768px) { 
   .coin-container {
     flex: 0 1 calc(30% - 20px); /* Adjusted to 50% for two items in a row */
-    max-width: calc(50% - 20px);
+    /* max-width: calc(50% - 20px); */
+    max-width: 100%;
   
   }
 }
+
+@media (max-width: 576px) { 
+  .coin-container {
+    flex: 0 1 100%; /* Set to 100% for one item in a row */
+    max-width: 100%;
+  }
+}
+
 
 /* Card */
 .card {

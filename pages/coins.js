@@ -1,6 +1,6 @@
 const COINS_URL =
   "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1";
-
+//https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1
 const COINS_DATA = "coinsData";
 const SELECTED_COINS = "selectedCoins";
 const MAX_AMOUNT_SELECTED_COINS = 5;
