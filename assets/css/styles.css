@@ -112,14 +112,7 @@ input:checked + .slider:before {
   margin-left: -60px;
 }
 
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
+
 
 /* Crypto logo */
 .crypto-logo {
@@ -274,6 +267,7 @@ input:checked + .slider:before {
 .navbar-toggler:hover {
   transform: rotate(90deg) !important;
   transition: transform 0.3s ease-in-out !important;
+
 }
 
 .navbar-toggler:focus {
@@ -298,10 +292,11 @@ input:checked + .slider:before {
   .navbar-toggler {
     visibility: visible !important;
     color: transparent !important;
+    
   }
 }
 
-@media (min-width: 769px) {
+@media (min-width: 577.33px) {
   /* Hide the button on larger screens */
   .navbar-toggler {
     visibility: hidden !important;
