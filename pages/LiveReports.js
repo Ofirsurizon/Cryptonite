@@ -1,17 +1,60 @@
-let selectedChart;
+let chartData;
 let chartInterval;
 
-const colors = ["red", "green", "blue", "yellow", "magenta"];
+const CHART_COLORS = ["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF"];
+const CHART_INTERVAL_TIME = 5_000;
 
-function clearChartData() {
-  if (selectedChart) {
-    selectedChart.destroy();
-    selectedChart = null;
-  }
+$(document).ready(mountLiveReportPage);
+
+function mountLiveReportPage() {
+  $("#liveReportsPage").click(function (event) {
+    event.preventDefault();
+    loadLiveReportPage();
+  });
+
+  $("#homePage").click(moveToHomePage);
 }
 
-function chartData() {
-  selectedChart = Highcharts.chart("liveReportsChart", {
+function moveToHomePage(event) {
+  event.preventDefault();
+  if (chartInterval) clearInterval(chartInterval);
+  $("#search-form").show();
+  $("#container").empty();
+  mountHomePage();
+}
+
+function loadLiveReportPage() {
+  moveToLiveReportPage();
+
+  selectedCoins = getSessionStorage(SELECTED_COINS) ?? [];
+
+  if (!selectedCoins || !selectedCoins.length) {
+    renderEmptyChartMessage();
+    return;
+  }
+
+  initializeChat();
+  fillSelectedCoinsToChart();
+  chartInterval = setInterval(fillSelectedCoinsToChart, CHART_INTERVAL_TIME);
+}
+
+function renderEmptyChartMessage() {
+  $("#container").html(
+    `<p class="bg-dark text-warning">Please select coins to view reports.</p>`
+  );
+}
+
+function moveToLiveReportPage() {
+  $("#search-form").attr("style", "display: none !important;");
+  $("#container").empty();
+  $("#container").html(
+    '<div id="live-reports-chart" style="width:100%;max-width:800px"></div>'
+  );
+  clearChartData();
+}
+
+function initializeChat() {
+  chartData = Highcharts.chart("live-reports-chart", {
     chart: {
       type: "line",
     },
@@ -29,62 +72,19 @@ function chartData() {
     series: selectedCoins.map((coin, index) => ({
       name: coin,
       data: [],
-      color: colors[index % colors.length],
+      color: CHART_COLORS[index % CHART_COLORS.length],
     })),
   });
 }
 
-function loadReports() {
-  $("#search-form").attr("style", "display: none !important;");
-  $("#container").empty();
-  $("#container").html(
-    '<div id="liveReportsChart" style="width:100%;max-width:800px"></div>'
+async function fillSelectedCoinsToChart() {
+  const symbolsSelectedCoins = selectedCoins.map((sc) =>
+    coinsData
+      .find((coinsDataItem) => coinsDataItem.id === sc)
+      .symbol.toUpperCase()
   );
-
-  selectedCoins = getSessionStorage(SELECTED_COINS) ?? [];
-
-  clearChartData();
-
-  if (selectedCoins && selectedCoins.length > 0) {
-    chartData();
-    chartDataItems();
-    chartInterval = setInterval(chartDataItems, 5000);
-  } else {
-    $("#container").html(
-      `<p class="bg-dark text-warning">Please select coins to view reports.</p>`
-    );
-  }
-}
-
-$(document).ready(function () {
-  $("#liveRepotsPage").click(function (event) {
-    event.preventDefault();
-    loadReports();
-  });
-
-  $("#homePage").click(function (event) {
-    event.preventDefault();
-    clearInterval(chartInterval);
-    $("#search-form").show();
-    $("#container").empty();
-    mountHomePage();
-  });
-});
-
-async function chartDataItems() {
-  if (!selectedCoins || selectedCoins.length === 0) {
-    $("#container").html(
-      `<p class="text-white">Please select coins to view reports.</p>`
-    );
-    return;
-  }
-
   // Creating a comma-separated string of coin symbols
-  const symbols = selectedCoins
-    .map(
-      (sc) => coinsData.find((coinsDataItem) => coinsDataItem.id === sc).symbol.toUpperCase()
-    )
-    .join(",");
+  const symbols = symbolsSelectedCoins.join(",");
 
   // Making one API call to get all the selected coins' data
   const response = await fetch(
@@ -93,13 +93,10 @@ async function chartDataItems() {
   const data = await response.json();
 
   // Adding the new data to the chart
-  selectedCoins.forEach((coin, index) => {
-    const selectedSymbol = coinsData.find(
-      (coinsDataItem) => coinsDataItem.id === coin
-    ).symbol.toUpperCase();
-    const price = data[selectedSymbol].USD;
+  symbolsSelectedCoins.forEach((symbolsSelectedCoin, index) => {
+    const price = data[symbolsSelectedCoin].USD;
 
-    selectedChart.series[index].addPoint(
+    chartData.series[index].addPoint(
       {
         x: new Date().getTime(),
         y: price,
@@ -108,5 +105,11 @@ async function chartDataItems() {
     );
   });
 
-  selectedChart.redraw();
+  chartData.redraw();
+}
+
+function clearChartData() {
+  if (!chartData) return;
+  chartData.destroy();
+  chartData = null;
 }
