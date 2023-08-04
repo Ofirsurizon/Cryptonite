@@ -419,7 +419,7 @@ input:checked + .slider:before {
   text-align: justify;
 }
 
-#liveReportsChart {
+#live-reports-chart {
   background: black;
   height: 300px !important; /* Increase the height to make it even bigger */
 }
