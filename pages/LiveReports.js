@@ -6,25 +6,25 @@ const colors = ["red", "green", "blue", "yellow", "magenta"];
 function clearChartData() {
   if (selectedChart) {
     selectedChart.destroy();
-    selectedChart = null; 
+    selectedChart = null;
   }
 }
 
 function chartData() {
-  selectedChart = Highcharts.chart('liveReportsChart', {
+  selectedChart = Highcharts.chart("liveReportsChart", {
     chart: {
-      type: 'line'
+      type: "line",
     },
     title: {
-      text: 'Live Reports'
+      text: "Live Reports",
     },
     xAxis: {
-      type: 'datetime',
+      type: "datetime",
     },
     yAxis: {
       title: {
-        text: 'Price (USD)'
-      }
+        text: "Price (USD)",
+      },
     },
     series: selectedCoins.map((coin, index) => ({
       name: coin,
@@ -47,7 +47,7 @@ function loadReports() {
 
   if (selectedCoins && selectedCoins.length > 0) {
     chartData();
-    chartDataItems(); 
+    chartDataItems();
     chartInterval = setInterval(chartDataItems, 5000);
   } else {
     $("#container").html(
@@ -67,7 +67,7 @@ $(document).ready(function () {
     clearInterval(chartInterval);
     $("#search-form").show();
     $("#container").empty();
-    window.mount();
+    mountHomePage();
   });
 });
 
@@ -79,18 +79,34 @@ async function chartDataItems() {
     return;
   }
 
-  for (const [index, coin] of selectedCoins.entries()) {
-    const response = await fetch(
-      `https://api.coingecko.com/api/v3/coins/${coin}`
-    );
-    const data = await response.json();
-    const price = data.market_data.current_price.usd;
+  // Creating a comma-separated string of coin symbols
+  const symbols = selectedCoins
+    .map(
+      (sc) => coinsData.find((coinsDataItem) => coinsDataItem.id === sc).symbol.toUpperCase()
+    )
+    .join(",");
 
-    selectedChart.series[index].addPoint({
-      x: new Date().getTime(),
-      y: price,
-    }, false);
-  }
+  // Making one API call to get all the selected coins' data
+  const response = await fetch(
+    `https://min-api.cryptocompare.com/data/pricemulti?fsyms=${symbols}&tsyms=USD`
+  );
+  const data = await response.json();
+
+  // Adding the new data to the chart
+  selectedCoins.forEach((coin, index) => {
+    const selectedSymbol = coinsData.find(
+      (coinsDataItem) => coinsDataItem.id === coin
+    ).symbol.toUpperCase();
+    const price = data[selectedSymbol].USD;
+
+    selectedChart.series[index].addPoint(
+      {
+        x: new Date().getTime(),
+        y: price,
+      },
+      false
+    );
+  });
 
   selectedChart.redraw();
 }

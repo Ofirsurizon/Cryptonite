@@ -1,19 +1,16 @@
-const COINS_URL =
+const TOTAL_COINS_API_URL =
   "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1";
-//https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1
-const COINS_DATA = "coinsData";
-const SELECTED_COINS = "selectedCoins";
+const COINS_DATA = "cryptonite-coins-data";
+const SELECTED_COINS = "cryptonite-selected-coins";
 const MAX_AMOUNT_SELECTED_COINS = 5;
 
 let selectedCoins = getSessionStorage(SELECTED_COINS) ?? [];
 let coinsData;
 
-$(document).ready(mount);
+$(document).ready(mountHomePage);
 
-window.mount = mount;
-
-// mount the page
-async function mount() {
+// mount the home page
+async function mountHomePage() {
   $("#modal-container").hide();
   await loadCoinsPage();
   $(".search-coins-input").off("input", onSearch).on("input", onSearch);
@@ -30,40 +27,36 @@ function onSearch() {
 // LOAD THE COINS PAGE
 async function loadCoinsPage() {
   displayLoader();
-  const data = await getCoinsData();
-  if (Array.isArray(data)) renderCoins(data);
+
+  let data = getSessionStorage(COINS_DATA);
+  if (!data)  {
+    // if there is no data on storage fetch and save it
+    data = await fetchCoins();
+    saveSessionStorage(COINS_DATA, data);
+  }
+
+  if (Array.isArray(data)) {
+    renderCoins(data);
+  }
+
+  // save reference to the data on global variable
   coinsData = data;
+
   hideLoader();
 }
 
 // GET COINS DATA AND HANDLING IT
-
-async function getCoinsData() {
-  const storageData = getSessionStorage(COINS_DATA);
-  if (storageData) return storageData;
-
-  const coinsData = await getCoinData();
-  if (coinsData) saveSessionStorage(COINS_DATA, coinsData);
-  return coinsData;
-}
-
-async function getCoinData() {
+async function fetchCoins() {
   try {
-    const data = await fetchCoins();
+    const response = await fetch(TOTAL_COINS_API_URL);
+    const data = await response.json();
     return data;
   } catch (err) {
     handleError();
   }
 }
 
-async function fetchCoins() {
-  const response = await fetch(COINS_URL);
-  const data = await response.json();
-  return data;
-}
-
 // SEARCH INPUT
-
 function searchInCoins(item) {
   let data = getSessionStorage(COINS_DATA);
   cleanContainer();
@@ -82,16 +75,15 @@ $("#search-form").on("submit", function (event) {
 });
 
 //  RENDER COINS EVENT HANDLERS AND RENDER EACH COIN
-
 function renderCoins(coins) {
   cleanContainer();
   for (const coin of coins) {
     renderCoinElement(coin);
-    addCoinEventHandlers(coin);
+    addCoinEventListeners(coin);
   }
 }
 
-function addCoinEventHandlers(coin) {
+function addCoinEventListeners(coin) {
   $(`#more-info-coin-${coin.id}`).on("click", onCoinMoreInfoClick(coin));
 
   const isSelectedCoin = selectedCoins.some((id) => id == coin.id);
@@ -131,7 +123,6 @@ function renderCoinElement(coin) {
 }
 
 //  COINS TOGGLE HANDLING
-
 function onCoinToggle(coin) {
   return function () {
     if (!this.checked) {
@@ -154,14 +145,13 @@ function onCoinToggle(coin) {
 function updateStorageSelectedCoins() {
   saveSessionStorage(SELECTED_COINS, selectedCoins);
 }
-// COIN REMOVAL
 
+// COIN REMOVAL
 function removeCoinFromSelectedCoins(coin) {
   selectedCoins = selectedCoins.filter((coinId) => coinId !== coin.id);
 }
 
 // MORE INFO BUTTON
-
 function onCoinMoreInfoClick(coin) {
   return async () => {
     cleanContainer();
@@ -173,15 +163,14 @@ function onCoinMoreInfoClick(coin) {
 }
 
 // CLEAN CONTAINER FUNCTION
-
 function cleanContainer() {
   $("#container").empty();
 }
 
 // Session storage
 function getSessionStorage(key) {
-  const coinsData = sessionStorage.getItem(key);
-  return coinsData ? JSON.parse(coinsData) : null;
+  const coinsStorageData = sessionStorage.getItem(key);
+  return coinsStorageData ? JSON.parse(coinsStorageData) : null;
 }
 
 function saveSessionStorage(key, value) {
@@ -209,7 +198,6 @@ function handleError() {
 }
 
 // RENDER COINS REPLACEMENT
-
 function renderCoinReplacementModal(newCoin) {
   $("#selected-coins-list").empty();
 
@@ -264,7 +252,6 @@ function addDeselectEventHandler(newCoin) {
   });
 }
 
-
 // MORE INFO DATA AND FETCH
 async function getMoreInfoData(item) {
   try {
@@ -282,7 +269,6 @@ async function fetchMoreInfoData(item) {
 }
 
 //  RENDER MORE INFO
-
 function renderMoreInfo(moreInfoData, coin) {
   $("#container").html(
     `
@@ -322,6 +308,6 @@ function renderMoreInfo(moreInfoData, coin) {
   // CLOSE BTN
   $(".more-info-close-btn").on("click", async function () {
     cleanContainer();
-    await mount();
+    await mountHomePage();
   });
 }
